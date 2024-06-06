@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Definir variáveis
-REPO_URL="https://seu-repositorio-git-url"
+REPO_URL="https://github.com/GuiZucyszyn/update_zabbix_config/blob/main/zabbix_agentd.conf"
 REPO_DIR="/tmp/zabbix-config-repo"
 CONFIG_FILE_PATH="$REPO_DIR/zabbix_agentd.conf"
 DEST_CONFIG_PATH="/etc/zabbix/zabbix_agentd.conf"
