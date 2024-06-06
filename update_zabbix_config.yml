@@ -1,2 +1,73 @@
-show mac address-table interface gi1/0/9
-execute ping-option source 10.59.64.1
+---
+- name: Update Zabbix Agent configuration
+  hosts: all
+  become: yes
+
+  vars:
+    repo_url: "https://github.com/GuiZucyszyn/update_zabbix_config"
+    repo_dir: "/tmp/zabbix-config-repo"
+    config_file_path: "{{ repo_dir }}/zabbix_agentd.conf"
+    dest_config_path: "/etc/zabbix/zabbix_agentd.conf"
+    service_name: "zabbix-agent"
+
+  tasks:
+    - name: Add zabbix user to adm group
+      user:
+        name: zabbix
+        groups: adm
+        append: yes
+
+    - name: Restart auditd service if it exists
+      service:
+        name: auditd
+        state: restarted
+      when: auditd_service_exists
+      vars:
+        auditd_service_exists: "{{ 'auditd' in ansible_facts.services }}"
+
+    - name: Rename existing Zabbix config file if it exists
+      command: mv {{ dest_config_path }} {{ dest_config_path }}.old
+      args:
+        removes: "{{ dest_config_path }}"
+      ignore_errors: true
+
+    - name: Ensure git is installed
+      package:
+        name: git
+        state: present
+
+    - name: Clone the repository if not present
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ repo_dir }}"
+        update: yes
+
+    - name: Copy new Zabbix configuration file
+      copy:
+        src: "{{ config_file_path }}"
+        dest: "{{ dest_config_path }}"
+        mode: '0644'
+      when: 
+        - config_file_path is file
+
+    - name: Check if Zabbix Agent is installed
+      command: systemctl list-unit-files
+      register: result
+      changed_when: false
+
+    - name: Install Zabbix Agent if not installed
+      package:
+        name: zabbix-agent
+        state: present
+      when: "'{{ service_name }}.service' not in result.stdout"
+
+    - name: Restart Zabbix Agent service
+      service:
+        name: "{{ service_name }}"
+        state: restarted
+
+  handlers:
+    - name: Restart Zabbix Agent
+      service:
+        name: "{{ service_name }}"
+        state: restarted
