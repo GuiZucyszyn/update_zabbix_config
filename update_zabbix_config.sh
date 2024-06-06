@@ -1,30 +1,9 @@
-#!/bin/bash
-
 # Definir variáveis
-REPO_URL="https://github.com/GuiZucyszyn/update_zabbix_config.git"
+REPO_URL="https://github.com/GuiZucyszyn/update_zabbix_config/blob/main/zabbix_agentd.conf"
 REPO_DIR="/tmp/zabbix-config-repo"
 CONFIG_FILE_PATH="$REPO_DIR/zabbix_agentd.conf"
 DEST_CONFIG_PATH="/etc/zabbix/zabbix_agentd.conf"
 SERVICE_NAME="zabbix-agent"
-
-# Função para instalar o Zabbix Agent
-install_zabbix_agent() {
-    echo "Instalando o Zabbix Agent..."
-    if command -v apt-get &> /dev/null; then
-        apt-get update
-        apt-get install -y zabbix-agent
-    elif command -v yum &> /dev/null; then
-        yum install -y zabbix-agent
-    else
-        echo "Gerenciador de pacotes não suportado. Instale o Zabbix Agent manualmente."
-        exit 1
-    fi
-}
-
-# Verificar se o Zabbix Agent está instalado, se não, instalar
-if ! systemctl list-unit-files | grep -q "^${SERVICE_NAME}"; then
-    install_zabbix_agent
-fi
 
 # Adicionar o usuário zabbix ao grupo adm
 echo "Adicionando o usuário zabbix ao grupo adm..."
