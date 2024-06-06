@@ -1,0 +1,2 @@
+show mac address-table interface gi1/0/9
+execute ping-option source 10.59.64.1
